@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Montesierra Dormitory — Book Your Stay</title>
+<meta name="description" content="Browse rooms, view real-time bed availability, and reserve your bed at Montesierra Dormitory." />
+<meta property="og:title" content="Montesierra Dormitory — Book Your Stay" />
+<meta property="og:description" content="Reserve a bed at Montesierra Dormitory. Real-time availability, secure booking." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --brand: #3b82f6;
+    --brand-dark: #2563eb;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e5e7eb;
+  }
+  html, body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: #f8fafc; }
+  .container-x { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+
+  /* Buttons */
+  .btn-brand { background: var(--brand); color:#fff; border-radius: .75rem; padding: .6rem 1.1rem; font-weight: 800; transition: .2s all; box-shadow: 0 6px 14px -6px rgba(59,130,246,.6); }
+  .btn-brand:hover { background: var(--brand-dark); transform: translateY(-1px); }
+  .btn-outline { border: 1px solid #d1d5db; border-radius: .75rem; padding: .55rem 1rem; font-weight: 700; background: #fff; color:#334155; }
+  .btn-outline:hover { border-color: #0f172a; }
+
+  /* Inputs */
+  input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], input[type="time"], select, textarea {
+    width:100%; border:1px solid #e2e8f0; border-radius: .625rem; padding:.6rem .8rem; font-size:.88rem; background:#f8fafc;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus, select:focus, textarea:focus { outline:none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(59,130,246,.15); background:#fff; }
+  label.field-label { display:block; font-weight:800; color:#334155; margin-bottom:.35rem; font-size:.82rem; }
+
+  /* ================= DORM MAP STAT STRIP ================= */
+  .map-stats { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap:.75rem; }
+  .map-stat { position:relative; background:#fff; border:1px solid rgba(15,23,42,.06); border-radius:.9rem; padding:.85rem 1rem; box-shadow: 0 1px 2px rgba(15,23,42,.03); overflow:hidden; }
+  .map-stat::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background: var(--sc,#3b82f6); }
+  .map-stat .label { font-size:.62rem; font-weight:800; color:#64748b; letter-spacing:.12em; text-transform:uppercase; }
+  .map-stat .value { font-size:1.6rem; font-weight:900; color:#0f172a; margin-top:.15rem; font-variant-numeric: tabular-nums; }
+  .map-stat i { position:absolute; right:.75rem; top:.75rem; color: var(--sc,#3b82f6); opacity:.55; }
+
+  /* ================= LEGEND CHIPS ================= */
+  .legend-chip { display:inline-flex; align-items:center; gap:.5rem; padding:.5rem .85rem; border-radius:999px; background:#fff; border:1px solid #e2e8f0; font-size:.75rem; font-weight:800; color:#334155; cursor:pointer; transition:all .2s; letter-spacing:.02em; }
+  .legend-chip:hover { border-color: #cbd5e1; transform: translateY(-1px); }
+  .legend-chip .dot { width:.65rem; height:.65rem; border-radius:999px; box-shadow: 0 0 0 2px rgba(255,255,255,.6) inset; }
+  .legend-chip.active { color:#fff; border-color:transparent; box-shadow: 0 6px 20px -8px rgba(15,23,42,.35); }
+  .legend-chip.active .dot { box-shadow: 0 0 0 2px rgba(255,255,255,.6); }
+  .legend-chip[data-status="All"].active { background:#0f172a; }
+  .legend-chip[data-status="Available"].active { background:#22c55e; }
+  .legend-chip[data-status="Partial"].active { background:#eab308; }
+  .legend-chip[data-status="Fully"].active { background:#ef4444; }
+  .legend-chip[data-status="Reserved"].active { background:#3b82f6; }
+
+  /* ================= FLOOR LABEL ================= */
+  .floor-section { margin-bottom: 2rem; }
+  .floor-label { display:flex; align-items:center; gap:.6rem; font-size:.72rem; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:#64748b; margin-bottom:.9rem; padding-bottom:.5rem; border-bottom:1px dashed #e2e8f0; }
+  .floor-label i { color:#3b82f6; }
+
+  /* ================= DORM GRID + ROOM CARD ================= */
+  .dorm-grid { display:grid; gap:1.1rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  @media (max-width: 640px){ .dorm-grid { grid-template-columns: repeat(auto-fill, minmax(155px,1fr)); gap:.75rem; } }
+
+  .room-card {
+    position:relative; overflow:hidden; cursor:pointer;
+    display:flex; flex-direction:column; justify-content:space-between;
+    min-height:190px; padding:1rem 1.1rem 1.05rem;
+    border-radius: 1rem;
+    color:#0f172a; background:#fff;
+    border:1px solid rgba(15,23,42,.06);
+    box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px -12px rgba(15,23,42,.15);
+    transition: transform .25s cubic-bezier(.22,.61,.36,1), box-shadow .25s ease, border-color .25s ease;
+    animation: cardIn .35s cubic-bezier(.22,.61,.36,1) both;
+  }
+  @keyframes cardIn { from { opacity:0; transform: translateY(8px) scale(.98);} to { opacity:1; transform:none; } }
+  .room-card::before { content:""; position:absolute; inset:0 0 auto 0; height:6px; background: var(--accent, #22c55e); }
+  .room-card:hover { transform: translateY(-5px); border-color: rgba(59,130,246,.25); box-shadow: 0 10px 30px -10px rgba(15,23,42,.25); }
+
+  .rc-head { display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; margin-top:.35rem; }
+  .rc-num  { font-size:1.55rem; line-height:1.05; font-weight:900; letter-spacing:-.02em; color:#0f172a; }
+  .rc-floor{ display:inline-flex; align-items:center; gap:.3rem; font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.14em; color:#64748b; margin-top:.4rem; }
+  .rc-badge{ display:inline-flex; align-items:center; gap:.35rem; font-size:.6rem; font-weight:800; text-transform:uppercase; letter-spacing:.12em; padding:.32rem .55rem; border-radius:999px; color:#fff; background: var(--accent,#22c55e); box-shadow: 0 4px 12px -4px color-mix(in oklab, var(--accent,#22c55e) 60%, transparent); white-space:nowrap; }
+  .rc-badge i { font-size:.55rem; }
+
+  .rc-beds { display:flex; flex-wrap:wrap; gap:.28rem; margin-top:.85rem; }
+  .rc-bed  { width:22px; height:22px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:.6rem; background:#dcfce7; color:#16a34a; border:1px solid rgba(34,197,94,.35); font-weight:700; }
+  .rc-bed.occ { background:#ef4444; color:#fff; border-color:#dc2626; }
+  .rc-bed.res { background:#3b82f6; color:#fff; border-color:#2563eb; }
+  .rc-bed.maint { background:#e5e7eb; color:#6b7280; border-color:#d1d5db; }
+
+  .rc-progress-wrap { margin-top:.7rem; }
+  .rc-progress-meta { display:flex; justify-content:space-between; font-size:.65rem; font-weight:700; color:#475569; margin-bottom:.3rem; letter-spacing:.05em; }
+  .rc-progress { position:relative; height:5px; border-radius:999px; background:#eef2f7; overflow:hidden; }
+  .rc-progress > span { display:block; height:100%; border-radius:999px; background: var(--accent, #22c55e); width:0%; transition: width .5s cubic-bezier(.22,.61,.36,1); }
+
+  .rc-footer { display:flex; align-items:center; justify-content:space-between; margin-top:.75rem; font-size:.68rem; font-weight:800; color:#475569; letter-spacing:.03em; }
+  .rc-footer .foot-stats { display:flex; gap:.75rem; }
+  .rc-footer .foot-stats span i { margin-right:.25rem; }
+  .rc-cta { display:inline-flex; align-items:center; gap:.3rem; font-size:.62rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#16a34a; }
+
+  /* Status color tokens */
+  .room-Available { --accent:#22c55e; }
+  .room-Partial   { --accent:#eab308; }
+  .room-Fully     { --accent:#ef4444; background: linear-gradient(180deg, #fff 0%, #fef2f2 100%); }
+  .room-Reserved  { --accent:#3b82f6; }
+  .room-Empty     { --accent:#94a3b8; }
+  .room-Fully .rc-cta { color:#dc2626; }
+  .room-Reserved .rc-cta { color:#2563eb; }
+  .room-Partial .rc-cta { color:#b45309; }
+
+  /* Skeleton */
+  .skeleton { background: linear-gradient(90deg,#f1f5f9,#e2e8f0,#f1f5f9); background-size:200% 100%; animation: shimmer 1.4s infinite; border-radius: 1rem; height: 190px; }
+  @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+  /* ================= MODAL ================= */
+  .modal-backdrop { position:fixed; inset:0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); z-index: 90; display:none; align-items:center; justify-content:center; padding: 20px 12px; }
+  .modal-backdrop.open { display:flex; }
+  .modal { background:#fff; width:100%; border-radius: 1rem; overflow:hidden; box-shadow: 0 30px 80px -20px rgba(0,0,0,.5); animation: pop .25s ease; max-height: 92vh; display:flex; flex-direction:column; }
+  .modal.modal-lg { max-width: 900px; }
+  .modal.modal-md { max-width: 560px; }
+  @keyframes pop { from { transform: scale(.96); opacity:0; } to { transform: scale(1); opacity:1; } }
+
+  .modal-head-dark  { background:#1e293b; color:#fff; }
+  .modal-head-blue  { background:var(--brand); color:#fff; }
+  .modal-head       { padding: 1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; }
+  .modal-head h3    { font-weight: 800; font-size: 1.15rem; }
+  .modal-head .sub  { font-size: .78rem; opacity: .8; margin-top: .1rem; }
+  .modal-body       { padding: 1.25rem 1.5rem; overflow-y: auto; background: #f8fafc; flex:1; }
+  .modal-footer     { padding: .85rem 1.5rem; border-top: 1px solid #e2e8f0; background:#fff; display:flex; justify-content:flex-end; gap:.5rem; }
+
+  /* Room details stat strip */
+  .rd-stat-strip { background:#fff; border:1px solid #e2e8f0; border-radius:.75rem; padding:1rem; display:grid; grid-template-columns: repeat(4,1fr); gap:1rem; text-align:center; margin-bottom:1.25rem; }
+  .rd-stat-strip .lbl { font-size:.65rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#64748b; }
+  .rd-stat-strip .val { font-size:1.4rem; font-weight:900; margin-top:.15rem; font-variant-numeric: tabular-nums; }
+
+  /* Bed rows in room details */
+  .bed-row { display:flex; align-items:center; justify-content:space-between; padding: .9rem 1rem; border-radius: .625rem; gap:.75rem; }
+  .bed-row.available  { background:#f0fdf4; border:1.5px dashed #86efac; }
+  .bed-row.occupied   { background:#fef2f2; border:1.5px dashed #fca5a5; }
+  .bed-row.reserved   { background:#eff6ff; border:1.5px dashed #93c5fd; }
+  .bed-row.maintenance{ background:#f3f4f6; border:1.5px dashed #d1d5db; }
+  .bed-row .bed-tag { display:inline-flex; flex-direction:column; align-items:center; justify-content:center; min-width:52px; padding:.35rem .5rem; border-radius:.5rem; font-weight:800; line-height:1; }
+  .bed-row.available .bed-tag { background:#dcfce7; color:#166534; }
+  .bed-row.occupied  .bed-tag { background:#fee2e2; color:#991b1b; }
+  .bed-row.reserved  .bed-tag { background:#dbeafe; color:#1e40af; }
+  .bed-row.maintenance .bed-tag { background:#e5e7eb; color:#4b5563; }
+  .bed-tag small { font-size:.55rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; opacity:.7; }
+  .bed-tag b { font-size:1rem; }
+  .bed-status-txt { font-size:.72rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+  .bed-row.available .bed-status-txt { color:#16a34a; }
+  .bed-row.occupied  .bed-status-txt { color:#dc2626; }
+  .bed-row.reserved  .bed-status-txt { color:#2563eb; }
+  .bed-row.maintenance .bed-status-txt { color:#4b5563; }
+
+  .btn-checkin { background:#16a34a; color:#fff; font-weight:800; font-size:.78rem; padding:.5rem 1rem; border-radius:.5rem; box-shadow: 0 4px 10px -4px rgba(22,163,74,.55); transition:.2s; }
+  .btn-checkin:hover { background:#15803d; transform:translateY(-1px); }
+  .btn-checkin:disabled { background:#94a3b8; box-shadow:none; cursor:not-allowed; opacity:.7; }
+
+  /* Hero */
+  .hero { position:relative; overflow:hidden; border-radius: 1.25rem; color:#fff;
+    background:
+      linear-gradient(120deg, rgba(30,58,138,.75), rgba(15,23,42,.4)),
+      url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+  }
+
+  /* Toast */
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; padding:.8rem 1.2rem; border-radius: 999px; font-weight:600; font-size:.9rem; z-index:200; box-shadow: 0 10px 30px rgba(0,0,0,.25); opacity:0; pointer-events:none; transition:.25s; }
+  .toast.show { opacity:1; transform: translate(-50%, -6px); }
+  .toast.error { background:#b91c1c; }
+  .toast.success { background:#16a34a; }
+
+  details > summary { cursor:pointer; list-system:none; }
+  details > summary::-webkit-details-marker { display:none; }
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<header class="sticky top-0 bg-white/90 backdrop-blur border-b border-gray-200 z-50">
+  <div class="container-x flex items-center justify-between h-16">
+    <a href="#top" class="flex items-center gap-2">
+      <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white grid place-items-center font-black shadow-lg shadow-blue-500/25"><i class="fa-solid fa-map-location-dot"></i></span>
+      <span class="font-extrabold text-lg tracking-tight">Montesierra <span class="text-blue-600">Dormitory</span></span>
+    </a>
+    <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600">
+      <a href="#rooms" class="hover:text-black">Rooms</a>
+      <a href="#rules" class="hover:text-black">House Rules</a>
+      <a href="#faq" class="hover:text-black">FAQ</a>
+      <a href="#contact" class="hover:text-black">Contact</a>
+    </nav>
+    <a href="#rooms" class="btn-brand text-sm hidden sm:inline-block">Reserve a Bed</a>
+  </div>
+</header>
+
+<main id="top" class="container-x pt-8 space-y-10 pb-24">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero p-8 md:p-14">
+    <div class="max-w-2xl">
+      <span class="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 backdrop-blur">Live availability · Instant confirmation</span>
+      <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">Your home away from home.</h1>
+      <p class="mt-3 text-white/90 md:text-lg">Browse real rooms and beds, pick your favorite, and reserve online in minutes. Same trusted system used by our administration — always in sync.</p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="#rooms" class="btn-brand">Browse Rooms</a>
+        <a href="#faq" class="btn-outline">How it works</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DORMITORY MAP ================= -->
+  <section id="rooms" class="scroll-mt-24">
+    <!-- Header row: title + selectors (matches desktop app) -->
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 grid place-items-center text-white shadow-lg shadow-blue-500/25"><i class="fa-solid fa-map-location-dot"></i></div>
+        <div>
+          <h2 class="text-2xl font-black text-gray-900 tracking-tight">Dormitory Map</h2>
+          <p class="text-gray-500 text-sm">Live availability · click any room to view beds and reserve.</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-3 items-end">
+        <div>
+          <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Display Floor</label>
+          <select id="filter-floor" class="border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-bold bg-white shadow-sm">
+            <option value="all">All Floors</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">Room Status</label>
+          <select id="filter-avail" class="border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-bold bg-white shadow-sm">
+            <option value="">All Rooms</option>
+            <option value="Available">Available</option>
+            <option value="Partial">Partially Occupied</option>
+            <option value="Fully">Fully Occupied</option>
+            <option value="Reserved">Reserved</option>
+          </select>
+        </div>
+        <button onclick="loadData(true)" class="btn-outline text-sm h-[42px]"><i class="fa-solid fa-rotate mr-1.5"></i>Refresh</button>
+      </div>
+    </div>
+
+    <!-- Live stats strip -->
+    <div class="map-stats mb-5">
+      <div class="map-stat" style="--sc:#22c55e"><i class="fa-solid fa-door-open"></i><div class="label">Available Rooms</div><div class="value" id="stat-available">0</div></div>
+      <div class="map-stat" style="--sc:#ef4444"><i class="fa-solid fa-bed"></i><div class="label">Occupied Beds</div><div class="value" id="stat-occ-beds">0</div></div>
+      <div class="map-stat" style="--sc:#3b82f6"><i class="fa-solid fa-calendar-check"></i><div class="label">Reserved Beds</div><div class="value" id="stat-reserved">0</div></div>
+      <div class="map-stat" style="--sc:#0ea5e9"><i class="fa-solid fa-bed-pulse"></i><div class="label">Free Beds</div><div class="value" id="stat-beds">0</div></div>
+      <div class="map-stat" style="--sc:#8b5cf6"><i class="fa-solid fa-gauge-high"></i><div class="label">Occupancy Rate</div><div class="value" id="stat-rate">0%</div></div>
+      <div class="map-stat" style="--sc:#f59e0b"><i class="fa-solid fa-hourglass-half"></i><div class="label">Pending Res.</div><div class="value" id="stat-pending">0</div></div>
+    </div>
+
+    <!-- Legend chips (interactive filter) -->
+    <div class="flex flex-wrap gap-2 mb-4" id="legend-chips">
+      <button type="button" class="legend-chip active" data-status="All"    onclick="setStatusFilter('')"><span class="dot" style="background:#0f172a"></span> All Rooms</button>
+      <button type="button" class="legend-chip"        data-status="Available" onclick="setStatusFilter('Available')"><span class="dot" style="background:#22c55e"></span> Available</button>
+      <button type="button" class="legend-chip"        data-status="Partial"   onclick="setStatusFilter('Partial')"><span class="dot" style="background:#eab308"></span> Partially Occupied</button>
+      <button type="button" class="legend-chip"        data-status="Fully"     onclick="setStatusFilter('Fully')"><span class="dot" style="background:#ef4444"></span> Fully Occupied</button>
+      <button type="button" class="legend-chip"        data-status="Reserved"  onclick="setStatusFilter('Reserved')"><span class="dot" style="background:#3b82f6"></span> Reserved</button>
+    </div>
+
+    <!-- Search + secondary filters (kept for functionality parity) -->
+    <div class="bg-white rounded-xl border border-gray-200 p-3 flex flex-col md:flex-row gap-2 md:items-center mb-6">
+      <div class="relative flex-1">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <input id="search" type="text" placeholder="Search room number, name, floor..." class="!pl-10" />
+      </div>
+      <select id="filter-cap" class="md:w-40">
+        <option value="">Any capacity</option>
+        <option value="1">1 bed</option>
+        <option value="2">2 beds</option>
+        <option value="3">3 beds</option>
+        <option value="4">4 beds</option>
+        <option value="6">6+ beds</option>
+      </select>
+      <select id="filter-rate" class="md:w-48">
+        <option value="">Any rate</option>
+        <option value="0-5000">Up to ₱5,000</option>
+        <option value="5000-10000">₱5,000 – ₱10,000</option>
+        <option value="10000-15000">₱10,000 – ₱15,000</option>
+        <option value="15000-999999">₱15,000+</option>
+      </select>
+    </div>
+
+    <!-- Grid wrapper -->
+    <div id="rooms-wrapper" class="p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200/70" style="background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%)">
+      <div id="rooms-grid" class="dorm-grid">
+        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+      </div>
+      <p id="rooms-empty" class="hidden text-center text-gray-500 py-16">No rooms match your filters.</p>
+    </div>
+  </section>
+
+  <!-- ================= HOUSE RULES ================= -->
+  <section id="rules" class="scroll-mt-24">
+    <h2 class="text-2xl md:text-3xl font-extrabold mb-6">House Rules</h2>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="p-5 bg-white border border-gray-200 rounded-2xl"><i class="fa-solid fa-clock text-blue-600 text-xl"></i><h4 class="font-bold mt-3">Curfew: 10:00 PM</h4><p class="text-sm text-gray-500 mt-1">Late entries require prior notice to the administration.</p></div>
+      <div class="p-5 bg-white border border-gray-200 rounded-2xl"><i class="fa-solid fa-ban-smoking text-blue-600 text-xl"></i><h4 class="font-bold mt-3">No smoking or alcohol</h4><p class="text-sm text-gray-500 mt-1">Strictly prohibited inside the premises.</p></div>
+      <div class="p-5 bg-white border border-gray-200 rounded-2xl"><i class="fa-solid fa-users text-blue-600 text-xl"></i><h4 class="font-bold mt-3">Visitors in lobby only</h4><p class="text-sm text-gray-500 mt-1">Guests are not allowed inside the rooms.</p></div>
+      <div class="p-5 bg-white border border-gray-200 rounded-2xl"><i class="fa-solid fa-broom text-blue-600 text-xl"></i><h4 class="font-bold mt-3">Keep it clean</h4><p class="text-sm text-gray-500 mt-1">Boarders are responsible for their own space.</p></div>
+      <div class="p-5 bg-white border border-gray-200 rounded-2xl"><i class="fa-solid fa-peso-sign text-blue-600 text-xl"></i><h4 class="font-bold mt-3">Rent due monthly</h4><p class="text-sm text-gray-500 mt-1">Payments must be settled on or before due date.</p></div>
+      <div class="p-5 bg-white border border-gray-200 rounded-2xl"><i class="fa-solid fa-volume-xmark text-blue-600 text-xl"></i><h4 class="font-bold mt-3">Quiet hours after 9 PM</h4><p class="text-sm text-gray-500 mt-1">Respect fellow boarders' study & rest hours.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= FAQ ================= -->
+  <section id="faq" class="scroll-mt-24">
+    <h2 class="text-2xl md:text-3xl font-extrabold mb-6">Frequently Asked</h2>
+    <div class="space-y-3">
+      <details class="bg-white border border-gray-200 rounded-2xl p-5 group"><summary class="flex justify-between items-center font-bold">How do I reserve a bed?<i class="fa-solid fa-plus group-open:rotate-45 transition"></i></summary><p class="text-gray-600 mt-3 text-sm">Click any available room, choose a bed, fill out the short reservation form, and submit. You'll receive an email confirmation once your reservation is recorded.</p></details>
+      <details class="bg-white border border-gray-200 rounded-2xl p-5 group"><summary class="flex justify-between items-center font-bold">Is a deposit required?<i class="fa-solid fa-plus group-open:rotate-45 transition"></i></summary><p class="text-gray-600 mt-3 text-sm">Reservations are held pending confirmation. Deposit details are shared via email after admin review.</p></details>
+      <details class="bg-white border border-gray-200 rounded-2xl p-5 group"><summary class="flex justify-between items-center font-bold">What's included in the rent?<i class="fa-solid fa-plus group-open:rotate-45 transition"></i></summary><p class="text-gray-600 mt-3 text-sm">Bed, study desk, chair, and cooling. Utilities and Wi-Fi policies are communicated during check-in.</p></details>
+      <details class="bg-white border border-gray-200 rounded-2xl p-5 group"><summary class="flex justify-between items-center font-bold">Can I cancel my reservation?<i class="fa-solid fa-plus group-open:rotate-45 transition"></i></summary><p class="text-gray-600 mt-3 text-sm">Yes. Contact the administration and your reservation will be released.</p></details>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT ================= -->
+  <section id="contact" class="scroll-mt-24 grid md:grid-cols-2 gap-8">
+    <div>
+      <h2 class="text-2xl md:text-3xl font-extrabold mb-4">Visit us</h2>
+      <p class="text-gray-600 mb-6">We'd love to show you around. Drop by, call, or send us an email.</p>
+      <ul class="space-y-3 text-sm">
+        <li class="flex gap-3"><i class="fa-solid fa-location-dot text-blue-600 mt-1"></i><span>Montesierra Dormitory<br/>Baguio City, Philippines</span></li>
+        <li class="flex gap-3"><i class="fa-solid fa-phone text-blue-600 mt-1"></i><span>+63 900 000 0000</span></li>
+        <li class="flex gap-3"><i class="fa-solid fa-envelope text-blue-600 mt-1"></i><span>reservations@montesierra.example</span></li>
+      </ul>
+    </div>
+    <div class="rounded-2xl overflow-hidden border border-gray-200 min-h-[260px]">
+      <iframe class="w-full h-full min-h-[260px]" loading="lazy" src="https://www.google.com/maps?q=Baguio+City&output=embed"></iframe>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-gray-200 py-8 text-center text-sm text-gray-500 bg-white">
+  © <span id="year"></span> Montesierra Dormitory · Public Reservation Portal
+</footer>
+
+<!-- ================= ROOM DETAILS MODAL ================= -->
+<div id="modal-room" class="modal-backdrop" onclick="if(event.target===this) closeRoomModal()">
+  <div class="modal modal-lg">
+    <div class="modal-head modal-head-dark">
+      <div>
+        <h3 id="rd-title"><i class="fa-solid fa-door-open mr-2"></i><span id="rd-title-text">Room Details</span></h3>
+        <p class="sub">Occupancy Status</p>
+      </div>
+      <button onclick="closeRoomModal()" class="text-white/80 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="rd-stat-strip">
+        <div><p class="lbl">Capacity</p><p class="val text-gray-900" id="rd-cap">0</p></div>
+        <div><p class="lbl">Occupied</p><p class="val text-red-600" id="rd-occ">0</p></div>
+        <div><p class="lbl">Reserved</p><p class="val text-blue-600" id="rd-res">0</p></div>
+        <div><p class="lbl">Available</p><p class="val text-green-600" id="rd-avail">0</p></div>
+      </div>
+
+      <div class="flex justify-between items-center border-b border-gray-200 pb-2 mb-3">
+        <h4 class="font-bold text-gray-800 uppercase text-sm tracking-wider">Bed Assignments</h4>
+        <button onclick="openReservationModal('room')" id="rd-reserve-link" class="text-blue-600 text-xs font-bold hover:underline"><i class="fa-solid fa-calendar-plus mr-1"></i>Reserve Room</button>
+      </div>
+      <div id="rd-bed-list" class="space-y-3"></div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeRoomModal()" class="btn-outline text-sm">Close Window</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= BOOK RESERVATION MODAL ================= -->
+<div id="modal-res" class="modal-backdrop" onclick="if(event.target===this) closeResModal()">
+  <div class="modal modal-lg">
+    <div class="modal-head modal-head-blue">
+      <h3><i class="fa-solid fa-calendar-check mr-2"></i>Book Reservation</h3>
+      <button onclick="closeResModal()" class="text-white/80 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="reservation-form" class="modal-body space-y-4">
+      <!-- Top selectors -->
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="field-label">Reservation Type</label>
+          <select id="res-type" onchange="onResTypeChange()">
+            <option value="bed">Specific Bed</option>
+            <option value="room">Entire Room</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Select Room</label>
+          <input id="res-room-display" disabled />
+        </div>
+        <div id="res-bed-wrap">
+          <label class="field-label">Select Bed</label>
+          <select id="res-bed" onchange="onResBedChange()"></select>
+        </div>
+      </div>
+
+      <!-- Applicant details -->
+      <div class="border-t border-gray-200 pt-4">
+        <h4 class="font-bold text-gray-800 mb-3 uppercase text-sm tracking-wider">Applicant Details</h4>
+        <div class="grid md:grid-cols-2 gap-3">
+          <div class="md:col-span-2"><label class="field-label">Full Name</label><input name="fullName" required maxlength="120" /></div>
+          <div><label class="field-label">Contact</label><input name="mobile" type="tel" required maxlength="30" /></div>
+          <div><label class="field-label">Gmail</label><input name="email" type="email" required maxlength="200" /></div>
+        </div>
+      </div>
+
+      <!-- Schedule & payment -->
+      <div class="border-t border-gray-200 pt-4">
+        <h4 class="font-bold text-gray-800 mb-3 uppercase text-sm tracking-wider">Schedule &amp; Payment</h4>
+        <div class="grid md:grid-cols-2 gap-3">
+          <div><label class="field-label">Arrival Date</label><input name="moveInDate" type="date" required /></div>
+          <div><label class="field-label">Arrival Time</label><input name="arrivalTime" type="time" value="12:00" /></div>
+          <div><label class="field-label">Expiration Date</label><input name="expDate" type="date" /></div>
+          <div><label class="field-label">Expiration Time</label><input name="expTime" type="time" value="18:00" /></div>
+          <div><label class="field-label">Deposit (Opt)</label><input name="deposit" type="number" value="0" min="0" /></div>
+          <div>
+            <label class="field-label">Pay Method</label>
+            <select name="method" id="res-method"><option value="GCash">GCash</option></select>
+          </div>
+        </div>
+
+        <!-- GCash QR panel -->
+        <div id="gcash-panel" class="mt-4 rounded-xl border border-blue-100 bg-blue-50/60 p-4 flex flex-col sm:flex-row items-center gap-4">
+          <img id="gcash-qr" alt="GCash QR" class="w-36 h-36 rounded-lg bg-white p-2 border border-blue-200 shadow-sm" />
+          <div class="text-center sm:text-left">
+            <div class="text-[10px] font-black tracking-widest text-blue-700 uppercase">Scan to Pay via GCash</div>
+            <div class="mt-1 text-xs text-gray-600">Send your deposit to the dormitory's official GCash number:</div>
+            <div class="mt-2 text-lg font-black text-gray-900" id="gcash-number">—</div>
+            <div class="mt-1 text-[11px] text-gray-500">After payment, submit this form. The admin will verify and confirm your reservation via email.</div>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button type="button" class="btn-outline text-sm" onclick="closeResModal()">Cancel</button>
+      <button type="button" id="submit-btn" onclick="submitReservation()" class="btn-brand text-sm"><i class="fa-solid fa-check mr-1"></i>Confirm Reservation</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SUCCESS MODAL ================= -->
+<div id="modal-success" class="modal-backdrop" onclick="if(event.target===this) closeSuccessModal()">
+  <div class="modal modal-md">
+    <div class="p-8 text-center">
+      <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 grid place-items-center mx-auto text-3xl"><i class="fa-solid fa-check"></i></div>
+      <h2 class="text-2xl font-extrabold mt-4">Reservation received!</h2>
+      <p class="text-gray-500 mt-2 max-w-md mx-auto" id="success-msg">Your bed has been marked as <b>Reserved</b>.</p>
+      <div class="mt-6 inline-block text-left bg-gray-50 rounded-2xl p-5 border border-gray-200" id="success-details"></div>
+      <div class="mt-6"><button class="btn-brand" onclick="closeSuccessModal()">Done</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================
+ * CONFIG — point this at your existing Express (server.js) URL
+ * ============================================================ */
+const CONFIG = {
+  BACKEND_URL: (localStorage.getItem('MONTESIERRA_BACKEND_URL') || "https://mdms-backend-gzle.onrender.com").replace(/\/$/,''),
+};
+window.setBackend = (url) => { localStorage.setItem('MONTESIERRA_BACKEND_URL', url); location.reload(); };
+
+/* ============================================================
+ * STATE
+ * ============================================================ */
+let DB = null;
+let activeStatus = '';   // '', 'Available', 'Partial', 'Fully', 'Reserved'
+let selectedRoom = null;
+let selectedBed = null;
+
+/* ============================================================
+ * TOAST
+ * ============================================================ */
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type === 'error' ? ' error' : type==='success' ? ' success' : '');
+  clearTimeout(window.__tt);
+  window.__tt = setTimeout(() => t.className = 'toast', 3200);
+}
+
+/* ============================================================
+ * DATA
+ * ============================================================ */
+async function loadData(showToastOnDone=false) {
+  try {
+    const res = await fetch(CONFIG.BACKEND_URL + '/api/data', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    DB = await res.json();
+    render();
+    if (showToastOnDone) toast('Availability updated', 'success');
+  } catch (e) {
+    console.error(e);
+    document.getElementById('rooms-grid').innerHTML = `
+      <div class="col-span-full text-center py-16 bg-red-50 border border-red-100 rounded-2xl" style="grid-column: 1 / -1;">
+        <i class="fa-solid fa-plug-circle-xmark text-3xl text-red-500"></i>
+        <h3 class="mt-3 font-bold text-red-700">Cannot reach reservation system</h3>
+        <p class="text-sm text-red-600 mt-1">Backend URL: <code>${CONFIG.BACKEND_URL}</code></p>
+        <p class="text-xs text-red-500 mt-2">Ensure your server is online and has CORS enabled for this site.</p>
+      </div>`;
+  }
+}
+
+async function saveDB() {
+  const res = await fetch(CONFIG.BACKEND_URL + '/api/data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(DB),
+  });
+  if (!res.ok) throw new Error('Sync failed: HTTP ' + res.status);
+  return res.json();
+}
+
+/* ============================================================
+ * DERIVED
+ * ============================================================ */
+function publicRooms() { return (DB?.rooms || []).filter(r => r.type !== 'Admin'); }
+
+function bedStatus(bed) {
+  if (bed.status === 'Maintenance') return 'maintenance';
+  if (bed.isOccupied) return 'occupied';
+  if (bed.isReserved) return 'reserved';
+  return 'available';
+}
+
+function roomStatusKey(r) {
+  const beds = r.beds || [];
+  if (!beds.length) return 'Empty';
+  const occ = beds.filter(b => b.isOccupied).length;
+  const rsv = beds.filter(b => b.isReserved && !b.isOccupied).length;
+  const avail = beds.length - occ - rsv;
+  if (occ === beds.length) return 'Fully';
+  if (rsv > 0 && avail === 0) return 'Reserved';
+  if (avail === beds.length) return 'Available';
+  return 'Partial';
+}
+function roomStatusLabel(key) {
+  return ({ Available:'Available', Partial:'Partial', Fully:'Full', Reserved:'Reserved', Empty:'Empty' })[key] || key;
+}
+
+function money(n) { return '₱' + Number(n||0).toLocaleString('en-PH'); }
+function floorName(f){ const m = {1:'First Floor',2:'Second Floor',3:'Third Floor',4:'Fourth Floor'}; return m[f] || ('Floor '+f); }
+
+/* ============================================================
+ * RENDER
+ * ============================================================ */
+function render() {
+  renderFloorOptions();
+  renderStats();
+  renderRooms();
+}
+
+function renderFloorOptions() {
+  const sel = document.getElementById('filter-floor');
+  const cur = sel.value || 'all';
+  const floors = Array.from(new Set(publicRooms().map(r=>r.floor))).sort((a,b)=>a-b);
+  sel.innerHTML = `<option value="all">All Floors</option>` +
+    floors.map(f=>`<option value="${f}">${floorName(f)}</option>`).join('');
+  sel.value = floors.map(String).includes(cur) ? cur : 'all';
+}
+
+function renderStats() {
+  const rooms = publicRooms();
+  let availRooms=0, occBeds=0, reservedBeds=0, availBeds=0, totalBeds=0, filledBeds=0;
+  rooms.forEach(r => {
+    const beds = r.beds||[];
+    const occ = beds.filter(b=>b.isOccupied).length;
+    const rsv = beds.filter(b=>b.isReserved && !b.isOccupied).length;
+    const av  = beds.length - occ - rsv;
+    totalBeds += beds.length;
+    filledBeds += occ + rsv;
+    occBeds += occ;
+    reservedBeds += rsv;
+    availBeds += av;
+    if (av === beds.length && beds.length) availRooms++;
+  });
+  const pending = (DB?.reservations || []).filter(r => (r.status||'').toLowerCase()==='active' || (r.status||'').toLowerCase()==='pending').length;
+  document.getElementById('stat-available').textContent = availRooms;
+  document.getElementById('stat-occ-beds').textContent  = occBeds;
+  document.getElementById('stat-reserved').textContent  = reservedBeds;
+  document.getElementById('stat-beds').textContent      = availBeds;
+  document.getElementById('stat-rate').textContent      = totalBeds ? Math.round((filledBeds/totalBeds)*100) + '%' : '0%';
+  document.getElementById('stat-pending').textContent   = pending;
+}
+
+function setStatusFilter(status) {
+  activeStatus = status;
+  document.querySelectorAll('#legend-chips .legend-chip').forEach(c => {
+    const s = c.getAttribute('data-status');
+    c.classList.toggle('active', (status==='' && s==='All') || s===status);
+  });
+  // Sync select
+  document.getElementById('filter-avail').value = status;
+  renderRooms();
+}
+
+function renderRooms() {
+  const q       = document.getElementById('search').value.trim().toLowerCase();
+  const availF  = document.getElementById('filter-avail').value;
+  const capF    = document.getElementById('filter-cap').value;
+  const rateF   = document.getElementById('filter-rate').value;
+  const floorF  = document.getElementById('filter-floor').value;
+
+  activeStatus = availF;
+  // Sync chip active state to select
+  document.querySelectorAll('#legend-chips .legend-chip').forEach(c => {
+    const s = c.getAttribute('data-status');
+    c.classList.toggle('active', (availF==='' && s==='All') || s===availF);
+  });
+
+  let list = publicRooms();
+  if (floorF !== 'all') list = list.filter(r => String(r.floor) === String(floorF));
+  if (q) list = list.filter(r =>
+    String(r.roomNumber).includes(q) ||
+    (r.roomName||'').toLowerCase().includes(q) ||
+    ('floor '+r.floor).includes(q) ||
+    (r.beds||[]).some(b => (b.bedNo||'').toLowerCase().includes(q))
+  );
+  if (availF) list = list.filter(r => roomStatusKey(r) === availF);
+  if (capF) {
+    const n = parseInt(capF,10);
+    list = list.filter(r => capF==='6' ? r.capacity>=6 : r.capacity===n);
+  }
+  if (rateF) {
+    const [lo,hi] = rateF.split('-').map(Number);
+    list = list.filter(r => r.rate>=lo && r.rate<=hi);
+  }
+
+  const wrap = document.getElementById('rooms-grid');
+  const empty = document.getElementById('rooms-empty');
+  if (!list.length) { wrap.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+
+  // Group by floor
+  const byFloor = {};
+  list.forEach(r => { (byFloor[r.floor] = byFloor[r.floor] || []).push(r); });
+  const floors = Object.keys(byFloor).sort((a,b)=>a-b);
+
+  wrap.className = ''; // remove dorm-grid on wrapper; use sections
+  wrap.innerHTML = floors.map(f => {
+    const rooms = byFloor[f];
+    return `
+      <div class="floor-section">
+        <div class="floor-label"><i class="fa-solid fa-layer-group"></i> ${floorName(f)} · ${rooms.length} room${rooms.length===1?'':'s'}</div>
+        <div class="dorm-grid">
+          ${rooms.map(renderRoomCard).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderRoomCard(r) {
+  const beds = r.beds || [];
+  const occ  = beds.filter(b=>b.isOccupied).length;
+  const rsv  = beds.filter(b=>b.isReserved && !b.isOccupied).length;
+  const av   = beds.length - occ - rsv;
+  const key  = roomStatusKey(r);
+  const label = ({ Available:'AVAILABLE', Partial:'PARTIAL', Fully:'FULL', Reserved:'RESERVED', Empty:'EMPTY' })[key];
+  const pct  = beds.length ? Math.round(((occ + rsv) / beds.length) * 100) : 0;
+
+  // bed dot classes
+  const bedDots = beds.map(b => {
+    const st = bedStatus(b);
+    const cls = st==='occupied' ? 'occ' : st==='reserved' ? 'res' : st==='maintenance' ? 'maint' : '';
+    return `<span class="rc-bed ${cls}" title="Bed ${b.bedNo} · ${st}"></span>`;
+  }).join('');
+
+  const cta = key==='Available'
+    ? `<span class="rc-cta"><i class="fa-solid fa-arrow-right-to-bracket"></i> View</span>`
+    : key==='Fully'
+      ? `<span class="rc-cta"><i class="fa-solid fa-lock"></i> Full</span>`
+      : `<span class="rc-cta"><i class="fa-solid fa-eye"></i> View</span>`;
+
+  return `
+    <div class="room-card room-${key}" onclick="openRoom(${r.id})" title="${r.roomName}">
+      <div class="rc-head">
+        <div>
+          <div class="rc-num">${r.roomName || ('Room '+r.roomNumber)}</div>
+          <div class="rc-floor"><i class="fa-solid fa-layer-group"></i> ${floorName(r.floor)}</div>
+        </div>
+        <span class="rc-badge"><i class="fa-solid fa-circle"></i>${label}</span>
+      </div>
+
+      <div class="rc-beds">${bedDots}</div>
+
+      <div class="rc-progress-wrap">
+        <div class="rc-progress-meta">
+          <span>${occ + rsv} of ${beds.length} beds</span>
+          <span>${pct}%</span>
+        </div>
+        <div class="rc-progress"><span style="width:${pct}%"></span></div>
+      </div>
+
+      <div class="rc-footer">
+        <div class="foot-stats">
+          <span><i class="fa-solid fa-user"></i>${occ} OCC</span>
+          <span><i class="fa-regular fa-square"></i>${av} FREE</span>
+        </div>
+        ${cta}
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+ * ROOM DETAILS MODAL
+ * ============================================================ */
+function openRoom(roomId) {
+  const r = publicRooms().find(x => x.id === roomId);
+  if (!r) return;
+  selectedRoom = r; selectedBed = null;
+
+  const beds = r.beds || [];
+  const occ  = beds.filter(b=>b.isOccupied).length;
+  const rsv  = beds.filter(b=>b.isReserved && !b.isOccupied).length;
+  const av   = beds.length - occ - rsv;
+
+  document.getElementById('rd-title-text').textContent = `${r.roomName} Details`;
+  document.getElementById('rd-cap').textContent   = r.capacity ?? beds.length;
+  document.getElementById('rd-occ').textContent   = occ;
+  document.getElementById('rd-res').textContent   = rsv;
+  document.getElementById('rd-avail').textContent = av;
+
+  const list = document.getElementById('rd-bed-list');
+  list.innerHTML = beds.map(b => {
+    const st = bedStatus(b);
+    const labelTxt =
+      st==='available' ? 'AVAILABLE' :
+      st==='occupied'  ? 'OCCUPIED'  :
+      st==='reserved'  ? 'RESERVED'  : 'MAINTENANCE';
+    const canReserve = st==='available';
+    return `
+      <div class="bed-row ${st}">
+        <div class="flex items-center gap-3">
+          <div class="bed-tag"><small>BED</small><b>${b.bedNo}</b></div>
+          <span class="bed-status-txt">${labelTxt}</span>
+        </div>
+        <button class="btn-checkin" ${canReserve? '' : 'disabled'} onclick="pickBedAndOpenReservation('${b.bedNo}')">Reserve</button>
+      </div>`;
+  }).join('');
+
+  // Toggle reserve link if there's anything to reserve
+  document.getElementById('rd-reserve-link').style.visibility = av > 0 ? 'visible' : 'hidden';
+
+  document.getElementById('modal-room').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeRoomModal() {
+  document.getElementById('modal-room').classList.remove('open');
+  if (!document.getElementById('modal-res').classList.contains('open') &&
+      !document.getElementById('modal-success').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+}
+
+/* ============================================================
+ * RESERVATION MODAL
+ * ============================================================ */
+function pickBedAndOpenReservation(bedNo) {
+  const bed = selectedRoom?.beds.find(b => b.bedNo === bedNo);
+  if (!bed || bed.isOccupied || bed.isReserved) return;
+  selectedBed = bed;
+  openReservationModal();
+}
+
+function openReservationModal(defaultType) {
+  if (!selectedRoom) return;
+  const beds = selectedRoom.beds || [];
+  const availableBeds = beds.filter(b => !b.isOccupied && !b.isReserved && b.status !== 'Maintenance');
+  if (!availableBeds.length) { toast('No available beds in this room.', 'error'); return; }
+
+  // Populate bed select
+  const bedSel = document.getElementById('res-bed');
+  bedSel.innerHTML = availableBeds.map(b => `<option value="${b.bedNo}">Bed ${b.bedNo}</option>`).join('');
+  if (!selectedBed || selectedBed.isOccupied || selectedBed.isReserved) selectedBed = availableBeds[0];
+  bedSel.value = selectedBed.bedNo;
+
+  document.getElementById('res-room-display').value = `${selectedRoom.roomName} (Room #${selectedRoom.roomNumber})`;
+
+  // Reservation type default
+  const typeSel = document.getElementById('res-type');
+  typeSel.value = defaultType === 'room' ? 'room' : 'bed';
+  onResTypeChange();
+
+  // GCash panel: read owner's GCash number from receiptConfig.phone
+  const gcashNum = (DB && DB.receiptConfig && DB.receiptConfig.phone) ? String(DB.receiptConfig.phone).trim() : '';
+  const numEl = document.getElementById('gcash-number');
+  const qrEl  = document.getElementById('gcash-qr');
+  if (gcashNum) {
+    numEl.textContent = gcashNum;
+    const payload = encodeURIComponent(`GCash Payment\nAccount: ${gcashNum}\nMontesierra Dormitory`);
+    qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${payload}`;
+    qrEl.style.opacity = '1';
+  } else {
+    numEl.textContent = 'Not configured — please contact admin';
+    qrEl.removeAttribute('src');
+    qrEl.style.opacity = '.25';
+  }
+
+  // Default expiration date = today + 7 days
+  const form = document.getElementById('reservation-form');
+  const today = new Date();
+  const exp = new Date(today.getTime() + 7*24*60*60*1000);
+  const fmt = d => d.toISOString().slice(0,10);
+  if (!form.moveInDate.value) form.moveInDate.value = fmt(today);
+  if (!form.expDate.value)    form.expDate.value    = fmt(exp);
+
+  document.getElementById('modal-res').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function onResTypeChange() {
+  const t = document.getElementById('res-type').value;
+  document.getElementById('res-bed-wrap').style.display = (t === 'room') ? 'none' : '';
+}
+function onResBedChange() {
+  const bedNo = document.getElementById('res-bed').value;
+  const bed = selectedRoom?.beds.find(b => b.bedNo === bedNo);
+  if (bed) selectedBed = bed;
+}
+function closeResModal() {
+  document.getElementById('modal-res').classList.remove('open');
+  if (!document.getElementById('modal-room').classList.contains('open') &&
+      !document.getElementById('modal-success').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+}
+
+/* ============================================================
+ * SUBMIT
+ * ============================================================ */
+async function submitReservation() {
+  const btn = document.getElementById('submit-btn');
+  const form = document.getElementById('reservation-form');
+  const fd = new FormData(form);
+  const data = Object.fromEntries(fd.entries());
+  const resType = document.getElementById('res-type').value === 'room' ? 'room' : 'bed';
+
+  if (!data.fullName?.trim() || !data.email?.trim() || !data.mobile?.trim() || !data.moveInDate) {
+    return toast('Please complete required fields', 'error');
+  }
+  if (!/^\S+@\S+\.\S+$/.test(data.email)) return toast('Enter a valid email', 'error');
+  if (resType === 'bed' && !selectedBed) return toast('Please pick a bed', 'error');
+
+  btn.disabled = true;
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i>Submitting...';
+
+  try {
+    const fresh = await fetch(CONFIG.BACKEND_URL + '/api/data', { cache:'no-store' }).then(r => r.json());
+    const room = fresh.rooms.find(r => r.id === selectedRoom.id);
+    if (!room) throw new Error('Room no longer exists.');
+
+    let targetBeds = [];
+    if (resType === 'bed') {
+      const bed = room.beds.find(b => b.bedNo === selectedBed.bedNo);
+      if (!bed) throw new Error('Bed no longer exists.');
+      if (bed.isOccupied || bed.isReserved) throw new Error('Sorry, that bed was just taken. Please pick another.');
+      targetBeds = [bed];
+    } else {
+      targetBeds = (room.beds || []).filter(b => !b.isOccupied && !b.isReserved && b.status !== 'Maintenance');
+      if (!targetBeds.length) throw new Error('This room has no available beds left.');
+      const anyTaken = (room.beds || []).some(b => b.isOccupied || b.isReserved);
+      if (anyTaken) throw new Error('Room is no longer fully available. Please pick another option.');
+    }
+
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+    const expDate = data.expDate || (function(){
+      const d = new Date(now.getTime() + 7*24*60*60*1000);
+      return d.toISOString().split('T')[0];
+    })();
+
+    const reservation = {
+      id: 'RES-' + Date.now(),
+      type: resType,
+      roomId: room.id,
+      bedNo: resType === 'bed' ? targetBeds[0].bedNo : null,
+      name: data.fullName.trim(),
+      contact: data.mobile.trim(),
+      email: data.email.trim(),
+      date: data.moveInDate,
+      time: data.arrivalTime || '14:00',
+      expDate: expDate,
+      expTime: data.expTime || '23:59',
+      deposit: Number(data.deposit || 0),
+      method: 'GCash',
+      status: 'Active',
+      createdAt: fmt(now),
+      remarks: `Source: Public Portal | Payment: GCash`,
+      source: 'public-portal',
+    };
+
+    targetBeds.forEach(b => { b.isReserved = true; b.reservationId = reservation.id; });
+    fresh.reservations = Array.isArray(fresh.reservations) ? fresh.reservations : [];
+    fresh.reservations.push(reservation);
+
+    DB = fresh;
+    await saveDB();
+
+    fetch(CONFIG.BACKEND_URL + '/api/send-reservation-email', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ kind:'confirmation', reservation }),
+    }).catch(()=>{});
+
+    showSuccess(reservation, room, targetBeds);
+    render();
+  } catch (err) {
+    console.error(err);
+    toast(err.message || 'Reservation failed', 'error');
+    btn.disabled = false;
+    btn.innerHTML = originalHTML;
+  }
+}
+
+function showSuccess(res, room, targetBeds) {
+  const label = res.type === 'room'
+    ? `the entire <b>${room.roomName}</b>`
+    : `<b>Bed ${res.bedNo}</b> in <b>${room.roomName}</b>`;
+  document.getElementById('success-msg').innerHTML =
+    `${label} has been marked as <b>Reserved</b>. A confirmation email has been sent to <b>${res.email}</b>.`;
+  const bedsLine = res.type === 'room'
+    ? `${room.roomName} · ${(targetBeds||[]).length} bed(s)`
+    : `${room.roomName} · Bed ${res.bedNo}`;
+  document.getElementById('success-details').innerHTML = `
+    <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Reference</p>
+    <p class="font-extrabold text-lg">${res.id}</p>
+    <p class="text-sm text-gray-600 mt-2">${bedsLine}</p>
+    <p class="text-sm text-gray-600">Move-in: ${res.date} ${res.time}</p>
+    <p class="text-xs text-gray-500 mt-2">Hold expires ${res.expDate} ${res.expTime}</p>`;
+  // Close underlying modals
+  closeResModal();
+  closeRoomModal();
+  document.getElementById('modal-success').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Reset button
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Confirm Reservation';
+  // Reset form
+  document.getElementById('reservation-form').reset();
+}
+function closeSuccessModal() {
+  document.getElementById('modal-success').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ============================================================
+ * BOOT
+ * ============================================================ */
+document.getElementById('year').textContent = new Date().getFullYear();
+['search','filter-avail','filter-cap','filter-rate','filter-floor'].forEach(id =>
+  document.getElementById(id).addEventListener('input', renderRooms)
+);
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') {
+    if (document.getElementById('modal-success').classList.contains('open')) return closeSuccessModal();
+    if (document.getElementById('modal-res').classList.contains('open'))     return closeResModal();
+    if (document.getElementById('modal-room').classList.contains('open'))    return closeRoomModal();
+  }
+});
+loadData();
+setInterval(loadData, 60000);
+</script>
+</body>
+</html>
