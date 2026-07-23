@@ -121,6 +121,7 @@
   .rc-footer .foot-stats span.occ-txt i  { color:#ef4444; }
   .rc-footer .foot-stats span.free-txt i { color:#94a3b8; }
   .rc-entire { display:inline-flex; align-items:center; gap:.35rem; font-size:.7rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:#dc2626; }
+  .rc-entire.rc-entire-res { color:#2563eb; }
   .rc-entire i { font-size:.72rem; }
 
   /* Status color tokens */
@@ -560,29 +561,41 @@ async function saveDB() {
 function publicRooms() { return (DB?.rooms || []); }
 function isAdminRoom(r) { return r && (r.type === 'Admin' || /admin/i.test(r.roomName || '')); }
 
-/* Detect: entire room reserved by one tenant AND checked-in (occupied).
-   Returns the reservation object when true, else null. */
-function entireRoomCheckedIn(r) {
+/* Detect an entire-room reservation for this room.
+   Returns { reservation, checkedIn } or null. */
+function entireRoomReservation(r) {
   if (!r) return null;
   const beds = (r.beds || []).filter(b => b.status !== 'Maintenance');
   if (!beds.length) return null;
   const reservations = (DB?.reservations || []);
-  // Primary check: any reservation for this room that is an entire-room type and checked-in / approved-occupied.
-  const res = reservations.find(x => {
+  const forRoom = reservations.filter(x => {
     if (!x || x.type !== 'room') return false;
     if (x.roomId !== r.id && x.room_id !== r.id) return false;
     const st = String(x.status || '').toLowerCase();
-    const checkedIn = x.isCheckedIn === true || x.checked_in === true || st === 'checked-in' || st === 'checkedin' || st === 'checked_in' || st === 'occupied' || st === 'active';
-    return checkedIn;
+    // Ignore cancelled / rejected / completed reservations.
+    if (['cancelled','canceled','rejected','declined','completed','checked-out','checkedout'].includes(st)) return false;
+    return true;
   });
-  if (res) return res;
-  // Fallback: every bed shares one reservation of type room and at least one is occupied.
-  const rid = beds[0].reservationId;
-  if (rid && beds.every(b => b.reservationId === rid)) {
-    const r2 = reservations.find(x => x.id === rid);
-    if (r2 && r2.type === 'room' && beds.some(b => b.isOccupied)) return r2;
+  let res = forRoom[0];
+  if (!res) {
+    // Fallback: every bed shares one reservation of type room.
+    const rid = beds[0].reservationId;
+    if (rid && beds.every(b => b.reservationId === rid)) {
+      const r2 = reservations.find(x => x.id === rid);
+      if (r2 && r2.type === 'room') res = r2;
+    }
   }
-  return null;
+  if (!res) return null;
+  const st = String(res.status || '').toLowerCase();
+  const checkedIn = res.isCheckedIn === true || res.checked_in === true
+    || ['checked-in','checkedin','checked_in','occupied','active'].includes(st)
+    || beds.some(b => b.isOccupied);
+  return { reservation: res, checkedIn };
+}
+// Back-compat: only returns the reservation when it's actually checked in.
+function entireRoomCheckedIn(r) {
+  const info = entireRoomReservation(r);
+  return info && info.checkedIn ? info.reservation : null;
 }
 
 
@@ -740,21 +753,31 @@ function renderRoomCard(r) {
   const rsv  = beds.filter(b=>b.isReserved && !b.isOccupied).length;
   const av   = beds.length - occ - rsv;
 
-  // ----- Entire-room check-in mode -----
-  const entireRes = entireRoomCheckedIn(r);
-  if (entireRes) {
+  // ----- Entire-room reservation (pending or checked-in) -----
+  const entireInfo = entireRoomReservation(r);
+  if (entireInfo) {
+    const checkedIn = entireInfo.checkedIn;
+    const stateKey  = checkedIn ? 'Fully'    : 'Reserved';
+    const badgeIcon = checkedIn ? 'fa-lock'  : 'fa-calendar-check';
+    const badgeText = checkedIn ? 'FULL'     : 'RESERVED';
+    const bedCls    = checkedIn ? 'occ'      : 'res';
+    const bedIcon   = checkedIn ? 'fa-user'  : 'fa-bookmark';
+    const footStat  = checkedIn
+      ? `<span class="occ-txt"><i class="fa-solid fa-user"></i>1 OCC</span>`
+      : `<span class="res-txt" style="color:#2563eb"><i class="fa-solid fa-bookmark" style="color:#2563eb"></i>1 RES</span>`;
+    const entireCls = checkedIn ? 'rc-entire' : 'rc-entire rc-entire-res';
     return `
-      <div class="room-card room-Fully" onclick="openRoom(${r.id})" title="${r.roomName}">
+      <div class="room-card room-${stateKey}" onclick="openRoom(${r.id})" title="${r.roomName}">
         <div class="rc-head">
           <div>
             <div class="rc-num">${r.roomName || ('Room '+r.roomNumber)}</div>
             <div class="rc-floor"><i class="fa-solid fa-layer-group"></i> ${floorName(r.floor)}</div>
           </div>
-          <span class="rc-badge"><i class="fa-solid fa-lock"></i>FULL</span>
+          <span class="rc-badge"><i class="fa-solid ${badgeIcon}"></i>${badgeText}</span>
         </div>
 
         <div class="rc-beds">
-          <span class="rc-bed occ" title="Entire room occupied"><i class="fa-solid fa-user"></i></span>
+          <span class="rc-bed ${bedCls}" title="Entire room ${checkedIn?'occupied':'reserved'}"><i class="fa-solid ${bedIcon}"></i></span>
         </div>
 
         <div class="rc-progress-wrap">
@@ -767,13 +790,14 @@ function renderRoomCard(r) {
 
         <div class="rc-footer">
           <div class="foot-stats">
-            <span class="occ-txt"><i class="fa-solid fa-user"></i>1 OCC</span>
-            <span class="rc-entire"><i class="fa-solid fa-lock"></i>Entire Room</span>
+            ${footStat}
+            <span class="${entireCls}"><i class="fa-solid ${badgeIcon}"></i>Entire Room</span>
           </div>
         </div>
 
       </div>`;
   }
+
 
   // ----- Standard card -----
   const key  = roomStatusKey(r);
