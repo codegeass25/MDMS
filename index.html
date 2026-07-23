@@ -561,35 +561,51 @@ async function saveDB() {
 function publicRooms() { return (DB?.rooms || []); }
 function isAdminRoom(r) { return r && (r.type === 'Admin' || /admin/i.test(r.roomName || '')); }
 
-/* Detect an entire-room reservation for this room.
-   Returns { reservation, checkedIn } or null. */
+/* Detect an entire-room reservation for this room by checking DB.reservations first.
+   Pending/active room reservations stay BLUE. Only admin-approved/check-in room
+   reservations turn RED and display "1 OCC · Entire Room". */
 function entireRoomReservation(r) {
   if (!r) return null;
   const beds = (r.beds || []).filter(b => b.status !== 'Maintenance');
   if (!beds.length) return null;
-  const reservations = (DB?.reservations || []);
-  const forRoom = reservations.filter(x => {
-    if (!x || x.type !== 'room') return false;
-    if (x.roomId !== r.id && x.room_id !== r.id) return false;
-    const st = String(x.status || '').toLowerCase();
-    // Ignore cancelled / rejected / completed reservations.
-    if (['cancelled','canceled','rejected','declined','completed','checked-out','checkedout'].includes(st)) return false;
-    return true;
-  });
-  let res = forRoom[0];
+
+  const normalize = v => String(v ?? '').trim().toLowerCase().replace(/[\s_]+/g, '-');
+  const valueMatches = (a, b) => String(a ?? '') === String(b ?? '');
+  const cancelledStates = new Set(['cancelled','canceled','rejected','declined','denied','completed','checked-out','checkedout','expired']);
+  const approvedStates = new Set(['approved','checked-in','checkedin','occupied','checked-in-by-admin','admin-approved']);
+
+  const reservations = Array.isArray(DB?.reservations) ? DB.reservations : [];
+  const roomReservations = reservations
+    .filter(x => {
+      if (!x || normalize(x.type) !== 'room') return false;
+      const linkedToRoom = valueMatches(x.roomId, r.id) || valueMatches(x.room_id, r.id) || valueMatches(x.roomNumber, r.roomNumber) || valueMatches(x.room_no, r.roomNumber);
+      if (!linkedToRoom) return false;
+      return !cancelledStates.has(normalize(x.status));
+    })
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt || b.date || 0) - new Date(a.updatedAt || a.createdAt || a.date || 0));
+
+  let res = roomReservations[0];
+
   if (!res) {
-    // Fallback: every bed shares one reservation of type room.
+    // Fallback only when the database row is not present yet: all beds share one room reservation id.
     const rid = beds[0].reservationId;
     if (rid && beds.every(b => b.reservationId === rid)) {
-      const r2 = reservations.find(x => x.id === rid);
-      if (r2 && r2.type === 'room') res = r2;
+      const r2 = reservations.find(x => valueMatches(x.id, rid) && normalize(x.type) === 'room' && !cancelledStates.has(normalize(x.status)));
+      if (r2) res = r2;
     }
   }
+
   if (!res) return null;
-  const st = String(res.status || '').toLowerCase();
-  const checkedIn = res.isCheckedIn === true || res.checked_in === true
-    || ['checked-in','checkedin','checked_in','occupied','active'].includes(st)
-    || beds.some(b => b.isOccupied);
+
+  const st = normalize(res.status);
+  const checkedIn = res.isCheckedIn === true
+    || res.checked_in === true
+    || res.checkedIn === true
+    || res.approved === true
+    || res.isApproved === true
+    || res.adminApproved === true
+    || approvedStates.has(st);
+
   return { reservation: res, checkedIn };
 }
 // Back-compat: only returns the reservation when it's actually checked in.
