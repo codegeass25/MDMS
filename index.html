@@ -499,7 +499,7 @@
  * CONFIG — point this at your existing Express (server.js) URL
  * ============================================================ */
 const CONFIG = {
-  BACKEND_URL: (localStorage.getItem('MONTESIERRA_BACKEND_URL') || "https://mdms-backend-v2.onrender.com").replace(/\/$/,''),
+  BACKEND_URL: (localStorage.getItem('MONTESIERRA_BACKEND_URL') || "https://mdms-backend-9d6m.onrender.com").replace(/\/$/,''),
 };
 window.setBackend = (url) => { localStorage.setItem('MONTESIERRA_BACKEND_URL', url); location.reload(); };
 
