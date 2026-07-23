@@ -66,55 +66,90 @@
   .floor-label i { color:#3b82f6; }
 
   /* ================= DORM GRID + ROOM CARD ================= */
-  .dorm-grid { display:grid; gap:1.1rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-  @media (max-width: 640px){ .dorm-grid { grid-template-columns: repeat(auto-fill, minmax(155px,1fr)); gap:.75rem; } }
+  .dorm-grid { display:grid; gap:1.25rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  @media (max-width: 640px){ .dorm-grid { grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap:.85rem; } }
 
   .room-card {
     position:relative; overflow:hidden; cursor:pointer;
     display:flex; flex-direction:column; justify-content:space-between;
-    min-height:190px; padding:1rem 1.1rem 1.05rem;
+    min-height:210px; padding:1.15rem 1.2rem 1.1rem;
     border-radius: 1rem;
     color:#0f172a; background:#fff;
-    border:1px solid rgba(15,23,42,.06);
-    box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px -12px rgba(15,23,42,.15);
+    border:1px solid rgba(15,23,42,.08);
+    box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px -14px rgba(15,23,42,.18);
     transition: transform .25s cubic-bezier(.22,.61,.36,1), box-shadow .25s ease, border-color .25s ease;
     animation: cardIn .35s cubic-bezier(.22,.61,.36,1) both;
   }
   @keyframes cardIn { from { opacity:0; transform: translateY(8px) scale(.98);} to { opacity:1; transform:none; } }
-  .room-card::before { content:""; position:absolute; inset:0 0 auto 0; height:6px; background: var(--accent, #22c55e); }
-  .room-card:hover { transform: translateY(-5px); border-color: rgba(59,130,246,.25); box-shadow: 0 10px 30px -10px rgba(15,23,42,.25); }
+  .room-card::before { content:""; position:absolute; inset:0 0 auto 0; height:5px; background: var(--accent, #22c55e); }
+  .room-card:hover { transform: translateY(-4px); border-color: rgba(59,130,246,.25); box-shadow: 0 12px 30px -12px rgba(15,23,42,.25); }
 
-  .rc-head { display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; margin-top:.35rem; }
-  .rc-num  { font-size:1.55rem; line-height:1.05; font-weight:900; letter-spacing:-.02em; color:#0f172a; }
-  .rc-floor{ display:inline-flex; align-items:center; gap:.3rem; font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.14em; color:#64748b; margin-top:.4rem; }
-  .rc-badge{ display:inline-flex; align-items:center; gap:.35rem; font-size:.6rem; font-weight:800; text-transform:uppercase; letter-spacing:.12em; padding:.32rem .55rem; border-radius:999px; color:#fff; background: var(--accent,#22c55e); box-shadow: 0 4px 12px -4px color-mix(in oklab, var(--accent,#22c55e) 60%, transparent); white-space:nowrap; }
-  .rc-badge i { font-size:.55rem; }
+  .rc-head { display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; margin-top:.3rem; }
+  .rc-num  { font-size:1.7rem; line-height:1.05; font-weight:900; letter-spacing:-.02em; color:#0f172a; }
+  .rc-floor{ display:inline-flex; align-items:center; gap:.35rem; font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.16em; color:#64748b; margin-top:.5rem; }
+  .rc-badge{
+    display:inline-flex; align-items:center; gap:.35rem;
+    font-size:.62rem; font-weight:900; text-transform:uppercase; letter-spacing:.12em;
+    padding:.38rem .7rem; border-radius:999px; color:#fff;
+    background: var(--accent,#22c55e);
+    box-shadow: 0 6px 14px -6px color-mix(in oklab, var(--accent,#22c55e) 55%, transparent);
+    white-space:nowrap;
+  }
+  .rc-badge i { font-size:.7rem; }
 
-  .rc-beds { display:flex; flex-wrap:wrap; gap:.28rem; margin-top:.85rem; }
-  .rc-bed  { width:22px; height:22px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:.6rem; background:#dcfce7; color:#16a34a; border:1px solid rgba(34,197,94,.35); font-weight:700; }
-  .rc-bed.occ { background:#ef4444; color:#fff; border-color:#dc2626; }
-  .rc-bed.res { background:#3b82f6; color:#fff; border-color:#2563eb; }
+  .rc-beds { display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.95rem; }
+  .rc-bed  {
+    width:30px; height:30px; border-radius:8px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:.78rem; font-weight:700;
+    background:#dcfce7; color:#16a34a; border:1.5px solid #86efac;
+  }
+  .rc-bed i { font-size:.78rem; }
+  .rc-bed.occ   { background:#ef4444; color:#fff; border-color:#dc2626; }
+  .rc-bed.res   { background:#3b82f6; color:#fff; border-color:#2563eb; }
   .rc-bed.maint { background:#e5e7eb; color:#6b7280; border-color:#d1d5db; }
 
-  .rc-progress-wrap { margin-top:.7rem; }
-  .rc-progress-meta { display:flex; justify-content:space-between; font-size:.65rem; font-weight:700; color:#475569; margin-bottom:.3rem; letter-spacing:.05em; }
-  .rc-progress { position:relative; height:5px; border-radius:999px; background:#eef2f7; overflow:hidden; }
+  .rc-progress-wrap { margin-top:.9rem; }
+  .rc-progress-meta { display:flex; justify-content:space-between; font-size:.72rem; font-weight:700; color:#475569; margin-bottom:.35rem; letter-spacing:.02em; }
+  .rc-progress { position:relative; height:6px; border-radius:999px; background:#eef2f7; overflow:hidden; }
   .rc-progress > span { display:block; height:100%; border-radius:999px; background: var(--accent, #22c55e); width:0%; transition: width .5s cubic-bezier(.22,.61,.36,1); }
 
-  .rc-footer { display:flex; align-items:center; justify-content:space-between; margin-top:.75rem; font-size:.68rem; font-weight:800; color:#475569; letter-spacing:.03em; }
-  .rc-footer .foot-stats { display:flex; gap:.75rem; }
-  .rc-footer .foot-stats span i { margin-right:.25rem; }
-  .rc-cta { display:inline-flex; align-items:center; gap:.3rem; font-size:.62rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#16a34a; }
+  .rc-footer { display:flex; align-items:center; justify-content:space-between; margin-top:.85rem; font-size:.72rem; font-weight:800; color:#475569; letter-spacing:.02em; }
+  .rc-footer .foot-stats { display:flex; gap:.9rem; }
+  .rc-footer .foot-stats span { display:inline-flex; align-items:center; gap:.3rem; }
+  .rc-footer .foot-stats span i { color:#64748b; }
+  .rc-footer .foot-stats span.occ-txt i  { color:#ef4444; }
+  .rc-footer .foot-stats span.free-txt i { color:#94a3b8; }
+  .rc-entire { display:inline-flex; align-items:center; gap:.35rem; font-size:.7rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:#dc2626; }
+  .rc-entire i { font-size:.72rem; }
 
   /* Status color tokens */
   .room-Available { --accent:#22c55e; }
-  .room-Partial   { --accent:#eab308; }
-  .room-Fully     { --accent:#ef4444; background: linear-gradient(180deg, #fff 0%, #fef2f2 100%); }
-  .room-Reserved  { --accent:#3b82f6; }
+  .room-Partial   { --accent:#eab308; background: linear-gradient(180deg, #ffffff 0%, #fefce8 100%); border-color: rgba(234,179,8,.25); }
+  .room-Fully     { --accent:#ef4444; background: linear-gradient(180deg, #ffffff 0%, #fef2f2 100%); border-color: rgba(239,68,68,.25); }
+  .room-Reserved  { --accent:#3b82f6; background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%); border-color: rgba(59,130,246,.25); }
   .room-Empty     { --accent:#94a3b8; }
-  .room-Fully .rc-cta { color:#dc2626; }
-  .room-Reserved .rc-cta { color:#2563eb; }
-  .room-Partial .rc-cta { color:#b45309; }
+
+  /* Admin office card */
+  .room-Admin {
+    --accent:#0f172a;
+    background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+    cursor: not-allowed;
+    color:#0f172a;
+  }
+  .room-Admin::before { background:#0f172a; height:5px; }
+  .room-Admin .rc-num { color:#0f172a; }
+  .room-Admin:hover   { transform:none; box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px -14px rgba(15,23,42,.18); border-color: rgba(15,23,42,.08); }
+  .rc-admin-badge {
+    display:inline-flex; align-items:center; gap:.35rem;
+    background:#0f172a; color:#fff;
+    font-size:.6rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase;
+    padding:.4rem .7rem; border-radius:999px;
+  }
+  .rc-restricted {
+    margin-top:auto; font-size:.7rem; font-weight:900; letter-spacing:.16em;
+    text-transform:uppercase; color:#64748b;
+  }
 
   /* Skeleton */
   .skeleton { background: linear-gradient(90deg,#f1f5f9,#e2e8f0,#f1f5f9); background-size:200% 100%; animation: shimmer 1.4s infinite; border-radius: 1rem; height: 190px; }
@@ -464,7 +499,7 @@
  * CONFIG — point this at your existing Express (server.js) URL
  * ============================================================ */
 const CONFIG = {
-  BACKEND_URL: (localStorage.getItem('MONTESIERRA_BACKEND_URL') || "https://mdms-backend-9d6m.onrender.com").replace(/\/$/,''),
+  BACKEND_URL: (localStorage.getItem('MONTESIERRA_BACKEND_URL') || "https://mdms-backend-v2.onrender.com").replace(/\/$/,''),
 };
 window.setBackend = (url) => { localStorage.setItem('MONTESIERRA_BACKEND_URL', url); location.reload(); };
 
@@ -522,7 +557,34 @@ async function saveDB() {
 /* ============================================================
  * DERIVED
  * ============================================================ */
-function publicRooms() { return (DB?.rooms || []).filter(r => r.type !== 'Admin'); }
+function publicRooms() { return (DB?.rooms || []); }
+function isAdminRoom(r) { return r && (r.type === 'Admin' || /admin/i.test(r.roomName || '')); }
+
+/* Detect: entire room reserved by one tenant AND checked-in (occupied).
+   Returns the reservation object when true, else null. */
+function entireRoomCheckedIn(r) {
+  if (!r) return null;
+  const beds = (r.beds || []).filter(b => b.status !== 'Maintenance');
+  if (!beds.length) return null;
+  const reservations = (DB?.reservations || []);
+  // Primary check: any reservation for this room that is an entire-room type and checked-in / approved-occupied.
+  const res = reservations.find(x => {
+    if (!x || x.type !== 'room') return false;
+    if (x.roomId !== r.id && x.room_id !== r.id) return false;
+    const st = String(x.status || '').toLowerCase();
+    const checkedIn = x.isCheckedIn === true || x.checked_in === true || st === 'checked-in' || st === 'checkedin' || st === 'checked_in' || st === 'occupied' || st === 'active';
+    return checkedIn;
+  });
+  if (res) return res;
+  // Fallback: every bed shares one reservation of type room and at least one is occupied.
+  const rid = beds[0].reservationId;
+  if (rid && beds.every(b => b.reservationId === rid)) {
+    const r2 = reservations.find(x => x.id === rid);
+    if (r2 && r2.type === 'room' && beds.some(b => b.isOccupied)) return r2;
+  }
+  return null;
+}
+
 
 function bedStatus(bed) {
   if (bed.status === 'Maintenance') return 'maintenance';
@@ -568,7 +630,7 @@ function renderFloorOptions() {
 }
 
 function renderStats() {
-  const rooms = publicRooms();
+  const rooms = publicRooms().filter(r => !isAdminRoom(r));
   let availRooms=0, occBeds=0, reservedBeds=0, availBeds=0, totalBeds=0, filledBeds=0;
   rooms.forEach(r => {
     const beds = r.beds||[];
@@ -624,7 +686,7 @@ function renderRooms() {
     ('floor '+r.floor).includes(q) ||
     (r.beds||[]).some(b => (b.bedNo||'').toLowerCase().includes(q))
   );
-  if (availF) list = list.filter(r => roomStatusKey(r) === availF);
+  if (availF) list = list.filter(r => isAdminRoom(r) || roomStatusKey(r) === availF);
   if (capF) {
     const n = parseInt(capF,10);
     list = list.filter(r => capF==='6' ? r.capacity>=6 : r.capacity===n);
@@ -658,26 +720,78 @@ function renderRooms() {
 }
 
 function renderRoomCard(r) {
+  // ----- Admin office: special restricted card -----
+  if (isAdminRoom(r)) {
+    return `
+      <div class="room-card room-Admin" title="Admin Office">
+        <div class="rc-head">
+          <div>
+            <div class="rc-num">${r.roomName || 'Admin Office'}</div>
+            <div class="rc-floor"><i class="fa-solid fa-layer-group"></i> ${floorName(r.floor)}</div>
+          </div>
+          <span class="rc-admin-badge"><i class="fa-solid fa-user-shield"></i> Admin Office</span>
+        </div>
+        <div class="rc-restricted">Restricted Area</div>
+      </div>`;
+  }
+
   const beds = r.beds || [];
   const occ  = beds.filter(b=>b.isOccupied).length;
   const rsv  = beds.filter(b=>b.isReserved && !b.isOccupied).length;
   const av   = beds.length - occ - rsv;
+
+  // ----- Entire-room check-in mode -----
+  const entireRes = entireRoomCheckedIn(r);
+  if (entireRes) {
+    return `
+      <div class="room-card room-Fully" onclick="openRoom(${r.id})" title="${r.roomName}">
+        <div class="rc-head">
+          <div>
+            <div class="rc-num">${r.roomName || ('Room '+r.roomNumber)}</div>
+            <div class="rc-floor"><i class="fa-solid fa-layer-group"></i> ${floorName(r.floor)}</div>
+          </div>
+          <span class="rc-badge"><i class="fa-solid fa-lock"></i>FULL</span>
+        </div>
+
+        <div class="rc-beds">
+          <span class="rc-bed occ" title="Entire room occupied"><i class="fa-solid fa-user"></i></span>
+        </div>
+
+        <div class="rc-progress-wrap">
+          <div class="rc-progress-meta">
+            <span>1 of ${beds.length} beds</span>
+            <span>100%</span>
+          </div>
+          <div class="rc-progress"><span style="width:100%"></span></div>
+        </div>
+
+        <div class="rc-footer">
+          <div class="foot-stats">
+            <span class="occ-txt"><i class="fa-solid fa-user"></i>1 OCC</span>
+            <span class="rc-entire"><i class="fa-solid fa-lock"></i>Entire Room</span>
+          </div>
+        </div>
+
+      </div>`;
+  }
+
+  // ----- Standard card -----
   const key  = roomStatusKey(r);
   const label = ({ Available:'AVAILABLE', Partial:'PARTIAL', Fully:'FULL', Reserved:'RESERVED', Empty:'EMPTY' })[key];
   const pct  = beds.length ? Math.round(((occ + rsv) / beds.length) * 100) : 0;
 
-  // bed dot classes
-  const bedDots = beds.map(b => {
+  const bedIcons = beds.map(b => {
     const st = bedStatus(b);
-    const cls = st==='occupied' ? 'occ' : st==='reserved' ? 'res' : st==='maintenance' ? 'maint' : '';
-    return `<span class="rc-bed ${cls}" title="Bed ${b.bedNo} · ${st}"></span>`;
+    if (st === 'available')   return `<span class="rc-bed"     title="Bed ${b.bedNo} · available"></span>`;
+    if (st === 'occupied')    return `<span class="rc-bed occ" title="Bed ${b.bedNo} · occupied"><i class="fa-solid fa-user"></i></span>`;
+    if (st === 'reserved')    return `<span class="rc-bed res" title="Bed ${b.bedNo} · reserved"><i class="fa-solid fa-bookmark"></i></span>`;
+    return `<span class="rc-bed maint" title="Bed ${b.bedNo} · maintenance"><i class="fa-solid fa-wrench"></i></span>`;
   }).join('');
 
-  const cta = key==='Available'
-    ? `<span class="rc-cta"><i class="fa-solid fa-arrow-right-to-bracket"></i> View</span>`
-    : key==='Fully'
-      ? `<span class="rc-cta"><i class="fa-solid fa-lock"></i> Full</span>`
-      : `<span class="rc-cta"><i class="fa-solid fa-eye"></i> View</span>`;
+  const badgeIcon = key==='Fully' ? 'fa-lock'
+                  : key==='Reserved' ? 'fa-calendar-check'
+                  : key==='Partial' ? 'fa-user-group'
+                  : 'fa-circle-check';
 
   return `
     <div class="room-card room-${key}" onclick="openRoom(${r.id})" title="${r.roomName}">
@@ -686,10 +800,10 @@ function renderRoomCard(r) {
           <div class="rc-num">${r.roomName || ('Room '+r.roomNumber)}</div>
           <div class="rc-floor"><i class="fa-solid fa-layer-group"></i> ${floorName(r.floor)}</div>
         </div>
-        <span class="rc-badge"><i class="fa-solid fa-circle"></i>${label}</span>
+        <span class="rc-badge"><i class="fa-solid ${badgeIcon}"></i>${label}</span>
       </div>
 
-      <div class="rc-beds">${bedDots}</div>
+      <div class="rc-beds">${bedIcons}</div>
 
       <div class="rc-progress-wrap">
         <div class="rc-progress-meta">
@@ -701,10 +815,10 @@ function renderRoomCard(r) {
 
       <div class="rc-footer">
         <div class="foot-stats">
-          <span><i class="fa-solid fa-user"></i>${occ} OCC</span>
-          <span><i class="fa-regular fa-square"></i>${av} FREE</span>
+          <span class="occ-txt"><i class="fa-solid fa-user"></i>${occ} OCC</span>
+          ${rsv > 0 ? `<span class="res-txt" style="color:#2563eb"><i class="fa-solid fa-bookmark" style="color:#2563eb"></i>${rsv} RES</span>` : ''}
+          ${av  > 0 ? `<span class="free-txt"><i class="fa-regular fa-square"></i>${av} FREE</span>` : ''}
         </div>
-        ${cta}
       </div>
     </div>`;
 }
@@ -714,7 +828,7 @@ function renderRoomCard(r) {
  * ============================================================ */
 function openRoom(roomId) {
   const r = publicRooms().find(x => x.id === roomId);
-  if (!r) return;
+  if (!r || isAdminRoom(r)) return;
   selectedRoom = r; selectedBed = null;
 
   const beds = r.beds || [];
