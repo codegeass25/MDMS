@@ -500,7 +500,7 @@
  * CONFIG — point this at your existing Express (server.js) URL
  * ============================================================ */
 const CONFIG = {
-  BACKEND_URL: (localStorage.getItem('MONTESIERRA_BACKEND_URL') || "https://pencil-drew-steering-hunt.trycloudflare.com").replace(/\/$/,''),
+  BACKEND_URL: (localStorage.getItem('MONTESIERRA_BACKEND_URL') || "https://api.mdmsportal.uk").replace(/\/$/,''),
 };
 window.setBackend = (url) => { localStorage.setItem('MONTESIERRA_BACKEND_URL', url); location.reload(); };
 
